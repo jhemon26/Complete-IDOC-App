@@ -2,29 +2,20 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ScrollView, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Card, Avatar, Badge, SearchBar, Chip } from '../../components/UIComponents';
+import { Card, Avatar, Badge, SearchBar, Chip, Button } from '../../components/UIComponents';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../utils/theme';
 import { doctorAPI } from '../../services/api';
-
-const DOCTORS = [
-  { id: 1, name: 'Dr. Sarah Chen', specialty: 'General Medicine', rating: 4.9, fee: 500, available: true, experience: '12 years', patients: 1200 },
-  { id: 2, name: 'Dr. James Okafor', specialty: 'Pediatrics', rating: 4.8, fee: 600, available: true, experience: '8 years', patients: 800 },
-  { id: 3, name: 'Dr. Aisha Patel', specialty: 'Dermatology', rating: 4.7, fee: 700, available: false, experience: '15 years', patients: 2000 },
-  { id: 4, name: 'Dr. Marcus Lee', specialty: 'Cardiology', rating: 4.9, fee: 900, available: true, experience: '20 years', patients: 3500 },
-  { id: 5, name: 'Dr. Elena Ruiz', specialty: 'Psychiatry', rating: 4.6, fee: 800, available: true, experience: '10 years', patients: 600 },
-  { id: 6, name: 'Dr. Raj Mehta', specialty: 'Orthopedics', rating: 4.5, fee: 750, available: true, experience: '14 years', patients: 1800 },
-];
-
-const SPECIALTIES = ['All', 'General Medicine', 'Pediatrics', 'Dermatology', 'Cardiology', 'Psychiatry', 'Orthopedics'];
 
 export default function DoctorListScreen({ navigation, route }) {
   const [search, setSearch] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState(route?.params?.specialty || 'All');
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const loadDoctors = React.useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const params = {};
       if (selectedSpecialty !== 'All') params.specialty = selectedSpecialty;
@@ -51,8 +42,9 @@ export default function DoctorListScreen({ navigation, route }) {
       });
 
       setDoctors(mapped);
-    } catch (error) {
+    } catch (err) {
       setDoctors([]);
+      setError(err);
     } finally {
       setLoading(false);
     }
@@ -77,7 +69,7 @@ export default function DoctorListScreen({ navigation, route }) {
 
   const specialties = useMemo(() => {
     const dynamic = [...new Set(doctors.map((d) => d.specialty).filter(Boolean))];
-    return dynamic.length ? ['All', ...dynamic] : SPECIALTIES;
+    return dynamic.length ? ['All', ...dynamic] : ['All'];
   }, [doctors]);
 
   const renderDoctor = ({ item }) => (
@@ -158,11 +150,20 @@ export default function DoctorListScreen({ navigation, route }) {
         contentContainerStyle={{ paddingHorizontal: SPACING.xl, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <View style={{ alignItems: 'center', paddingTop: 60 }}>
-            <Ionicons name="search" size={40} color={COLORS.textMuted} />
-            <Text style={{ ...FONTS.h4, color: COLORS.text, marginTop: SPACING.md }}>No doctors found</Text>
-            <Text style={{ ...FONTS.caption, color: COLORS.textSecondary }}>Try a different search</Text>
-          </View>
+          error ? (
+            <View style={{ alignItems: 'center', paddingTop: 60, paddingHorizontal: SPACING.xl }}>
+              <Ionicons name="alert-circle-outline" size={40} color={COLORS.danger} />
+              <Text style={{ ...FONTS.h4, color: COLORS.text, marginTop: SPACING.md }}>Could not load doctors</Text>
+              <Text style={{ ...FONTS.caption, color: COLORS.textSecondary, textAlign: 'center', marginTop: 4 }}>Check your connection and try again</Text>
+              <Button title="Retry" onPress={loadDoctors} style={{ marginTop: SPACING.lg }} />
+            </View>
+          ) : (
+            <View style={{ alignItems: 'center', paddingTop: 60 }}>
+              <Ionicons name="search" size={40} color={COLORS.textMuted} />
+              <Text style={{ ...FONTS.h4, color: COLORS.text, marginTop: SPACING.md }}>No doctors found</Text>
+              <Text style={{ ...FONTS.caption, color: COLORS.textSecondary }}>Try a different search or specialty</Text>
+            </View>
+          )
         }
       />
       )}

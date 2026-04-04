@@ -1,22 +1,8 @@
 import axios from 'axios';
-import { Platform } from 'react-native';
 import storage from '../utils/storage';
 
 // ─── Django server URL ───
-// localhost works for iOS Simulator
-// 10.0.2.2 works for Android Emulator
-// Use your machine's LAN IP (e.g. 192.168.x.x) for physical devices
-// Use deployed URL (e.g. http://144.126.239.34/api/v1) for production
-const PROD_BASE_URL = 'http://144.126.239.34/api/v1';
-const LOCAL_WEB_BASE_URL = 'http://localhost:8000/api/v1';
-const WEB_OVERRIDE_BASE_URL = (
-  Platform.OS === 'web'
-  && typeof window !== 'undefined'
-  && window.localStorage
-) ? window.localStorage.getItem('IDOC_API_BASE_URL') : null;
-
-const BASE_URL = WEB_OVERRIDE_BASE_URL
-  || PROD_BASE_URL;
+const BASE_URL = 'http://144.126.239.34/api/v1';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -175,6 +161,22 @@ export const notificationAPI = {
   markRead: (id) => api.post(`/notifications/${id}/read/`),
   markAllRead: () => api.post('/notifications/read-all/'),
   getUnreadCount: () => api.get('/notifications/unread-count/'),
+};
+
+// ─── Patient Request API ───
+export const requestAPI = {
+  create: (data) => api.post('/requests/', data),
+  list: (params) => api.get('/requests/', { params }),
+  getById: (id) => api.get(`/requests/${id}/`),
+  cancel: (id) => api.post(`/requests/${id}/cancel/`),
+};
+
+// ─── Doctor Availability API ───
+export const availabilityAPI = {
+  post: (data) => api.post('/availability/', data),
+  list: (params) => api.get('/availability/', { params }),
+  getMySlots: () => api.get('/availability/my-slots/'),
+  delete: (id) => api.delete(`/availability/${id}/`),
 };
 
 export default api;

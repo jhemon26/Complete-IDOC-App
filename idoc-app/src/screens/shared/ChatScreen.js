@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Avatar } from '../../components/UIComponents';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../utils/theme';
 import { chatAPI } from '../../services/api';
+import socketService from '../../services/socket';
 
 export default function ChatScreen({ navigation, route }) {
   const { user } = useAuth();
@@ -91,6 +92,28 @@ export default function ChatScreen({ navigation, route }) {
       setSending(false);
     }
   };
+
+  // ─── Real-time WebSocket subscription ───
+  useEffect(() => {
+    if (!activeRoomId) return;
+    socketService.joinRoom(activeRoomId);
+    const unsub = socketService.onNewMessage(activeRoomId, (data) => {
+      const senderId = data.sender_id || data.sender?.id;
+      if (senderId && String(senderId) === String(user?.id)) return; // skip own messages (already optimistic)
+      const newMsg = {
+        id: data.message_id || data.id || Date.now(),
+        text: data.message || data.content || data.text || '',
+        sender: 'other',
+        time: new Date().toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, newMsg]);
+      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 50);
+    });
+    return () => {
+      unsub();
+      socketService.leaveRoom(activeRoomId);
+    };
+  }, [activeRoomId, user?.id]);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({ title: recipient?.name || 'Chat' });

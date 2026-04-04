@@ -14,6 +14,9 @@ const QUICK_ACTIONS = [
   { id: 2, label: 'Buy Medicine', icon: 'medical-outline', screen: 'Pharmacy', color: COLORS.pharmacy },
   { id: 3, label: 'My Bookings', icon: 'calendar-outline', screen: 'Bookings', color: COLORS.info },
   { id: 4, label: 'My Orders', icon: 'cube-outline', screen: 'MyOrders', color: COLORS.warning },
+  { id: 5, label: 'Prescriptions', icon: 'document-text-outline', screen: 'MyPrescriptions', color: COLORS.success },
+  { id: 6, label: 'Post Request', icon: 'create-outline', screen: 'PostRequest', color: COLORS.accent },
+  { id: 7, label: 'Availability', icon: 'time-outline', screen: 'AvailabilityBoard', color: COLORS.primary },
 ];
 
 const SPECIALTIES = [
@@ -152,21 +155,27 @@ export default function HomeScreen({ navigation }) {
             <Text style={{ ...FONTS.caption, color: COLORS.textSecondary, marginTop: 4 }}>Book a consultation to see it here.</Text>
           </Card>
         ) : upcomingAppointments.map((apt) => (
-          <Card key={apt.id} style={styles.appointmentCard}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Avatar name={apt.doctor} size={48} color={COLORS.doctor} />
-              <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                <Text style={{ ...FONTS.bodyBold, color: COLORS.text }}>{apt.doctor}</Text>
-                <Text style={{ ...FONTS.caption, color: COLORS.textSecondary }}>{apt.specialty}</Text>
-                <Text style={{ ...FONTS.caption, color: COLORS.primary, marginTop: 2 }}>{apt.date}</Text>
+          <TouchableOpacity
+            key={apt.id}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('BookingDetail', { booking: apt })}
+          >
+            <Card style={styles.appointmentCard}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Avatar name={apt.doctor} size={48} color={COLORS.doctor} />
+                <View style={{ flex: 1, marginLeft: SPACING.md }}>
+                  <Text style={{ ...FONTS.bodyBold, color: COLORS.text }}>{apt.doctor}</Text>
+                  <Text style={{ ...FONTS.caption, color: COLORS.textSecondary }}>{apt.specialty}</Text>
+                  <Text style={{ ...FONTS.caption, color: COLORS.primary, marginTop: 2 }}>{apt.date}</Text>
+                </View>
+                <Badge
+                  text={apt.status === 'confirmed' ? 'Confirmed' : 'Pending'}
+                  color={apt.status === 'confirmed' ? COLORS.success : COLORS.warning}
+                  size="sm"
+                />
               </View>
-              <Badge
-                text={apt.status === 'confirmed' ? 'Confirmed' : 'Pending'}
-                color={apt.status === 'confirmed' ? COLORS.success : COLORS.warning}
-                size="sm"
-              />
-            </View>
-          </Card>
+            </Card>
+          </TouchableOpacity>
         ))}
       </View>
 

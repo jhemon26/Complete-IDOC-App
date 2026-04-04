@@ -1,49 +1,46 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Card, Avatar, Badge, SearchBar } from '../../components/UIComponents';
+import { Card, Avatar, Badge, SearchBar, Button } from '../../components/UIComponents';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../utils/theme';
 import { pharmacyAPI } from '../../services/api';
 
-const PHARMACIES = [
-  { id: 1, name: 'MedPlus Pharmacy', rating: 4.5, deliveryTime: '30 min', medicines: 1200, open: true },
-  { id: 2, name: 'HealthHub Drugs', rating: 4.7, deliveryTime: '45 min', medicines: 800, open: true },
-  { id: 3, name: 'CareFirst Pharmacy', rating: 4.3, deliveryTime: '1 hr', medicines: 1500, open: false },
-];
-
 export default function PharmacyListScreen({ navigation }) {
   const [search, setSearch] = useState('');
-  const [pharmacies, setPharmacies] = useState(PHARMACIES);
+  const [pharmacies, setPharmacies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const loadPharmacies = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await pharmacyAPI.list();
+      const rows = Array.isArray(data) ? data : data?.results || [];
+      const mapped = rows.map((entry) => {
+        const profile = entry.user ? entry : entry.pharmacy_profile || entry;
+        const user = profile.user || {};
+        return {
+          id: profile.id,
+          ownerId: user.id,
+          name: profile.pharmacy_name || user.name || 'Pharmacy',
+          rating: Number(profile.rating || 0),
+          deliveryTime: profile.delivery_time || '30 min',
+          medicines: Number(profile.medicine_count || 0),
+          open: profile.is_open !== false,
+          address: profile.address,
+        };
+      });
+      setPharmacies(mapped);
+    } catch (err) {
+      setPharmacies([]);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadPharmacies = async () => {
-      try {
-        const { data } = await pharmacyAPI.list();
-        const rows = Array.isArray(data) ? data : data?.results || [];
-        const mapped = rows.map((entry) => {
-          const profile = entry.user ? entry : entry.pharmacy_profile || entry;
-          const user = profile.user || {};
-          return {
-            id: profile.id,
-            ownerId: user.id,
-            name: profile.pharmacy_name || user.name || 'Pharmacy',
-            rating: Number(profile.rating || 0),
-            deliveryTime: profile.delivery_time || '30 min',
-            medicines: Number(profile.medicine_count || 0),
-            open: profile.is_open !== false,
-            address: profile.address,
-          };
-        });
-
-        setPharmacies(mapped.length ? mapped : PHARMACIES);
-      } catch (error) {
-        setPharmacies(PHARMACIES);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadPharmacies();
   }, []);
 
@@ -73,6 +70,24 @@ export default function PharmacyListScreen({ navigation }) {
         data={filtered}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ paddingHorizontal: SPACING.xl, paddingBottom: 100 }}
+        ListEmptyComponent={
+          error ? (
+            <Card style={{ marginTop: SPACING.lg }}>
+              <View style={{ alignItems: 'center', paddingVertical: SPACING.md }}>
+                <Ionicons name="alert-circle-outline" size={36} color={COLORS.danger} />
+                <Text style={{ ...FONTS.bodyBold, color: COLORS.text, marginTop: SPACING.md }}>Could not load pharmacies</Text>
+                <Text style={{ ...FONTS.caption, color: COLORS.textSecondary, marginTop: 4, textAlign: 'center' }}>Check your connection and try again</Text>
+                <Button title="Retry" onPress={loadPharmacies} style={{ marginTop: SPACING.md }} />
+              </View>
+            </Card>
+          ) : (
+            <View style={{ alignItems: 'center', paddingTop: 60 }}>
+              <Ionicons name="storefront-outline" size={40} color={COLORS.textMuted} />
+              <Text style={{ ...FONTS.h4, color: COLORS.text, marginTop: SPACING.md }}>No pharmacies found</Text>
+              <Text style={{ ...FONTS.caption, color: COLORS.textSecondary }}>Try a different search</Text>
+            </View>
+          )
+        }
         renderItem={({ item }) => (
           <Card
             onPress={() => navigation.navigate('MedicineList', { pharmacy: item })}

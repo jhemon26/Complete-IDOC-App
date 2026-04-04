@@ -66,6 +66,10 @@ export default function DoctorHomeScreen({ navigation }) {
           <Ionicons name="people-outline" size={16} color={COLORS.info} />
           <Text style={styles.quickActionText}>Patients</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.quickActionBtn} onPress={() => navigation.navigate('PostAvailability')}>
+          <Ionicons name="time-outline" size={16} color={COLORS.accent} />
+          <Text style={styles.quickActionText}>My Availability</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.quickActionBtn} onPress={() => navigation.navigate('Profile')}>
           <Ionicons name="person-outline" size={16} color={COLORS.success} />
           <Text style={styles.quickActionText}>Profile</Text>

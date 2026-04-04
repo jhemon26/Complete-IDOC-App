@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Avatar, Badge, Button, Input, Divider } from '../../components/UIComponents';
 import { COLORS, FONTS, SPACING, RADIUS, ROLE_CONFIG } from '../../utils/theme';
+import { authAPI } from '../../services/api';
 import Toast from 'react-native-toast-message';
 
 export default function ProfileScreen({ navigation, route }) {
@@ -22,6 +24,7 @@ export default function ProfileScreen({ navigation, route }) {
   const [deliveryTime, setDeliveryTime] = useState(user?.pharmacy_profile?.delivery_time || '');
   const [activeInfoItem, setActiveInfoItem] = useState(null);
   const [activePanel, setActivePanel] = useState(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const roleConfig = ROLE_CONFIG[user?.role] || ROLE_CONFIG.general;
   const hasDoctorProfile = user?.role === 'doctor';
@@ -75,6 +78,38 @@ export default function ProfileScreen({ navigation, route }) {
       Toast.show({ type: 'success', text1: 'Profile Updated' });
     } catch (e) {
       Toast.show({ type: 'error', text1: 'Failed to update', text2: e.message });
+    }
+  };
+
+  const handlePickPhoto = async () => {
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Toast.show({ type: 'error', text1: 'Permission required', text2: 'Allow photo access to upload a profile picture' });
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+      if (result.canceled) return;
+      const asset = result.assets[0];
+      setUploadingPhoto(true);
+      const formData = new FormData();
+      formData.append('profile_picture', {
+        uri: asset.uri,
+        type: asset.mimeType || 'image/jpeg',
+        name: asset.fileName || 'profile.jpg',
+      });
+      await authAPI.updateProfile(formData);
+      await updateProfile({});
+      Toast.show({ type: 'success', text1: 'Profile picture updated' });
+    } catch (e) {
+      Toast.show({ type: 'error', text1: 'Upload failed', text2: e.response?.data?.detail || 'Please try again' });
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
@@ -214,18 +249,23 @@ export default function ProfileScreen({ navigation, route }) {
       {activePanel === 'profile-picture' && (
         <Card style={{ marginHorizontal: SPACING.xl, marginTop: SPACING.md }}>
           <Text style={{ ...FONTS.h4, color: COLORS.text }}>Profile Picture</Text>
-          <Text style={{ ...FONTS.body, color: COLORS.textSecondary, marginTop: SPACING.sm }}>
-            Avatar upload can be managed from profile edit in this build. Full gallery/camera upload workflow can be added next.
-          </Text>
-          <View style={{ marginTop: SPACING.md }}>
-            <Button
-              title="Open Profile Edit"
-              onPress={() => {
-                setActivePanel(null);
-                setEditing(true);
-                Toast.show({ type: 'info', text1: 'Profile editor opened' });
-              }}
-            />
+          <View style={{ alignItems: 'center', marginVertical: SPACING.lg }}>
+            {user?.profile_picture ? (
+              <Image
+                source={{ uri: user.profile_picture }}
+                style={{ width: 80, height: 80, borderRadius: 40, borderWidth: 2, borderColor: COLORS.border }}
+              />
+            ) : (
+              <Avatar name={user?.name} size={80} color={roleConfig.color} />
+            )}
+          </View>
+          <Button
+            title={uploadingPhoto ? 'Uploading...' : 'Choose from Library'}
+            onPress={handlePickPhoto}
+            loading={uploadingPhoto}
+          />
+          <View style={{ marginTop: SPACING.sm }}>
+            <Button title="Close" variant="outline" onPress={() => setActivePanel(null)} />
           </View>
         </Card>
       )}

@@ -6,54 +6,45 @@ import { COLORS, FONTS, SPACING, RADIUS } from '../../utils/theme';
 import { pharmacyAPI } from '../../services/api';
 import Toast from 'react-native-toast-message';
 
-const MEDICINES = [
-  { id: 1, name: 'Paracetamol 500mg', price: 35, category: 'Pain Relief', stock: 500, prescription: false },
-  { id: 2, name: 'Amoxicillin 250mg', price: 120, category: 'Antibiotics', stock: 200, prescription: true },
-  { id: 3, name: 'Cetirizine 10mg', price: 45, category: 'Allergy', stock: 300, prescription: false },
-  { id: 4, name: 'Omeprazole 20mg', price: 80, category: 'Gastric', stock: 150, prescription: false },
-  { id: 5, name: 'Metformin 500mg', price: 60, category: 'Diabetes', stock: 400, prescription: true },
-  { id: 6, name: 'Ibuprofen 400mg', price: 40, category: 'Pain Relief', stock: 350, prescription: false },
-  { id: 7, name: 'Vitamin D3 1000IU', price: 250, category: 'Supplements', stock: 600, prescription: false },
-  { id: 8, name: 'Azithromycin 500mg', price: 180, category: 'Antibiotics', stock: 100, prescription: true },
-];
-
-const CATEGORIES = ['All', 'Pain Relief', 'Antibiotics', 'Allergy', 'Gastric', 'Diabetes', 'Supplements'];
-
 export default function MedicineListScreen({ navigation, route }) {
   const pharmacy = route?.params?.pharmacy;
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
   const [cart, setCart] = useState({});
-  const [medicines, setMedicines] = useState(MEDICINES);
+  const [medicines, setMedicines] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const loadMedicines = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await pharmacyAPI.getMedicines({ pharmacy: pharmacy?.ownerId });
+      const rows = Array.isArray(data) ? data : data?.results || [];
+      const mapped = rows.map((m) => ({
+        id: m.id,
+        name: m.name,
+        price: Number(m.price || 0),
+        category: m.category || 'General',
+        stock: Number(m.stock || 0),
+        prescription: !!m.requires_prescription,
+      }));
+      setMedicines(mapped);
+    } catch (err) {
+      setMedicines([]);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadMedicines = async () => {
-      try {
-        const { data } = await pharmacyAPI.getMedicines({ pharmacy: pharmacy?.ownerId });
-        const rows = Array.isArray(data) ? data : data?.results || [];
-        const mapped = rows.map((m) => ({
-          id: m.id,
-          name: m.name,
-          price: Number(m.price || 0),
-          category: m.category || 'General',
-          stock: Number(m.stock || 0),
-          prescription: !!m.requires_prescription,
-        }));
-        setMedicines(mapped.length ? mapped : MEDICINES);
-      } catch (error) {
-        setMedicines(MEDICINES);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadMedicines();
   }, [pharmacy?.ownerId]);
 
   const categories = useMemo(() => {
     const dynamic = [...new Set(medicines.map((m) => m.category).filter(Boolean))];
-    return dynamic.length ? ['All', ...dynamic] : CATEGORIES;
+    return dynamic.length ? ['All', ...dynamic] : ['All'];
   }, [medicines]);
 
   const filtered = medicines.filter((m) => {
@@ -94,6 +85,22 @@ export default function MedicineListScreen({ navigation, route }) {
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id.toString()}
+        ListEmptyComponent={
+          !loading && (error ? (
+            <View style={{ alignItems: 'center', paddingTop: 60, paddingHorizontal: SPACING.xl }}>
+              <Ionicons name="alert-circle-outline" size={36} color={COLORS.danger} />
+              <Text style={{ ...FONTS.bodyBold, color: COLORS.text, marginTop: SPACING.md }}>Could not load medicines</Text>
+              <Text style={{ ...FONTS.caption, color: COLORS.textSecondary, marginTop: 4, textAlign: 'center' }}>Check your connection and try again</Text>
+              <Button title="Retry" onPress={loadMedicines} style={{ marginTop: SPACING.md }} />
+            </View>
+          ) : (
+            <View style={{ alignItems: 'center', paddingTop: 60 }}>
+              <Ionicons name="medical-outline" size={40} color={COLORS.textMuted} />
+              <Text style={{ ...FONTS.h4, color: COLORS.text, marginTop: SPACING.md }}>No medicines found</Text>
+              <Text style={{ ...FONTS.caption, color: COLORS.textSecondary }}>Try a different search or category</Text>
+            </View>
+          ))
+        }
         ListHeaderComponent={
           <FlatList
             horizontal

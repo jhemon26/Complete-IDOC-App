@@ -2,19 +2,29 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Button, Input } from '../../components/UIComponents';
 import { COLORS, FONTS, SPACING } from '../../utils/theme';
+import { authAPI } from '../../services/api';
 import Toast from 'react-native-toast-message';
 
 export default function ForgotPasswordScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!email.trim()) {
       Toast.show({ type: 'error', text1: 'Enter your email address' });
       return;
     }
-    setSent(true);
-    Toast.show({ type: 'success', text1: 'Reset Link Sent', text2: 'Check your email for instructions' });
+    setLoading(true);
+    try {
+      await authAPI.forgotPassword(email.trim());
+      setSent(true);
+      Toast.show({ type: 'success', text1: 'Reset Link Sent', text2: 'Check your email for instructions' });
+    } catch (error) {
+      Toast.show({ type: 'error', text1: 'Request failed', text2: error.response?.data?.detail || error.response?.data?.email?.[0] || 'Please try again' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,7 +45,7 @@ export default function ForgotPasswordScreen({ navigation }) {
         {!sent ? (
           <>
             <Input label="Email" placeholder="Enter your email" value={email} onChangeText={setEmail} keyboardType="email-address" />
-            <Button title="Send Reset Link" onPress={handleSubmit} />
+            <Button title="Send Reset Link" onPress={handleSubmit} loading={loading} />
           </>
         ) : (
           <Button title="Back to Login" onPress={() => navigation.navigate('Login')} />

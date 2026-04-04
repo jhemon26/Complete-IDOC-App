@@ -7,7 +7,7 @@ import { COLORS, FONTS, SPACING } from '../../utils/theme';
 import { adminAPI } from '../../services/api';
 import Toast from 'react-native-toast-message';
 
-export default function AdminApprovalsScreen() {
+export default function AdminApprovalsScreen({ navigation }) {
   const [approvals, setApprovals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -113,36 +113,34 @@ export default function AdminApprovalsScreen() {
               <EmptyState title="All caught up" message="No pending approvals" icon={<Ionicons name="checkmark-circle-outline" size={46} color={COLORS.success} />} />
             )
           }
-          renderItem={({ item }) => (
-            <Card style={{ marginBottom: SPACING.md }}>
-              {(() => {
-                const approvalType = getApprovalType(item);
-                const typeColor = approvalType === 'doctor' ? COLORS.doctor : COLORS.pharmacy;
-                const label = approvalType ? approvalType.charAt(0).toUpperCase() + approvalType.slice(1) : 'User';
-                const licenseValue = item.license || item.license_number || 'N/A';
-
-                return (
-              <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-                <Avatar name={item.name} size={50} color={typeColor} />
-                <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, flexWrap: 'wrap' }}>
-                    <Text style={{ ...FONTS.bodyBold, color: COLORS.text }}>{item.name}</Text>
-                    <Badge text={label} color={typeColor} size="sm" />
+          renderItem={({ item }) => {
+            const approvalType = getApprovalType(item);
+            const typeColor = approvalType === 'doctor' ? COLORS.doctor : COLORS.pharmacy;
+            const label = approvalType ? approvalType.charAt(0).toUpperCase() + approvalType.slice(1) : 'User';
+            const licenseValue = item.license || item.license_number || 'N/A';
+            return (
+              <Card style={{ marginBottom: SPACING.md }} onPress={() => navigation.navigate('AdminDoctorDetail', { item })}>
+                <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+                  <Avatar name={item.name} size={50} color={typeColor} />
+                  <View style={{ flex: 1, marginLeft: SPACING.md }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, flexWrap: 'wrap' }}>
+                      <Text style={{ ...FONTS.bodyBold, color: COLORS.text }}>{item.name}</Text>
+                      <Badge text={label} color={typeColor} size="sm" />
+                    </View>
+                    <Text style={{ ...FONTS.caption, color: COLORS.textSecondary, marginTop: 2 }}>{item.email}</Text>
+                    {item.specialty && <Text style={{ ...FONTS.caption, color: COLORS.primary, marginTop: 2 }}>Specialty: {item.specialty}</Text>}
+                    {item.address && <Text style={{ ...FONTS.caption, color: COLORS.textSecondary, marginTop: 2 }}>{item.address}</Text>}
+                    <Text style={{ ...FONTS.small, color: COLORS.textMuted, marginTop: 4 }}>License: {licenseValue} • Submitted: {getSubmittedLabel(item.submitted)}</Text>
+                    <Text style={{ ...FONTS.small, color: COLORS.primary, marginTop: 4 }}>Tap to view full details →</Text>
                   </View>
-                  <Text style={{ ...FONTS.caption, color: COLORS.textSecondary, marginTop: 2 }}>{item.email}</Text>
-                  {item.specialty && <Text style={{ ...FONTS.caption, color: COLORS.primary, marginTop: 2 }}>Specialty: {item.specialty}</Text>}
-                  {item.address && <Text style={{ ...FONTS.caption, color: COLORS.textSecondary, marginTop: 2 }}>{item.address}</Text>}
-                  <Text style={{ ...FONTS.small, color: COLORS.textMuted, marginTop: 4 }}>License: {licenseValue} • Submitted: {getSubmittedLabel(item.submitted)}</Text>
                 </View>
-              </View>
-                );
-              })()}
-              <View style={{ flexDirection: 'row', gap: SPACING.sm, marginTop: SPACING.lg }}>
-                <Button title="Approve" size="sm" onPress={() => handleApprove(item)} style={{ flex: 1 }} />
-                <Button title="Reject" size="sm" variant="outline" color={COLORS.danger} onPress={() => handleReject(item)} style={{ flex: 1 }} />
-              </View>
-            </Card>
-          )}
+                <View style={{ flexDirection: 'row', gap: SPACING.sm, marginTop: SPACING.lg }}>
+                  <Button title="Approve" size="sm" onPress={() => handleApprove(item)} style={{ flex: 1 }} />
+                  <Button title="Reject" size="sm" variant="outline" color={COLORS.danger} onPress={() => handleReject(item)} style={{ flex: 1 }} />
+                </View>
+              </Card>
+            );
+          }}
         />
       )}
     </View>

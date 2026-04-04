@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Avatar, Button, Card, Input, Divider } from '../../components/UIComponents';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../utils/theme';
-import { bookingAPI } from '../../services/api';
+import { bookingAPI, doctorAPI } from '../../services/api';
 import Toast from 'react-native-toast-message';
 
 const DATES = Array.from({ length: 7 }, (_, i) => {
@@ -17,22 +17,6 @@ const DATES = Array.from({ length: 7 }, (_, i) => {
   };
 });
 
-const TIME_SLOTS = [
-  { time: '9:00 AM', available: true },
-  { time: '9:30 AM', available: false },
-  { time: '10:00 AM', available: true },
-  { time: '10:30 AM', available: true },
-  { time: '11:00 AM', available: true },
-  { time: '11:30 AM', available: false },
-  { time: '1:00 PM', available: true },
-  { time: '1:30 PM', available: true },
-  { time: '2:00 PM', available: true },
-  { time: '3:00 PM', available: true },
-  { time: '3:30 PM', available: false },
-  { time: '4:00 PM', available: true },
-  { time: '5:00 PM', available: true },
-];
-
 export default function BookingScreen({ navigation, route }) {
   const { doctor, selectedSlot } = route.params;
   const [selectedDate, setSelectedDate] = useState(DATES[0].full);
@@ -40,6 +24,32 @@ export default function BookingScreen({ navigation, route }) {
   const [consultationType, setConsultationType] = useState('video');
   const [symptoms, setSymptoms] = useState('');
   const [loading, setLoading] = useState(false);
+  const [timeSlots, setTimeSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+
+  useEffect(() => {
+    const loadSlots = async () => {
+      setSlotsLoading(true);
+      setSelectedTime(selectedSlot || null);
+      try {
+        const { data } = await doctorAPI.getSlots(doctor.id, selectedDate);
+        const rows = Array.isArray(data) ? data : data?.results || data?.slots || [];
+        if (rows.length) {
+          setTimeSlots(rows.map((s) => ({
+            time: s.time || s.slot || s.start_time || s,
+            available: s.is_available !== false && s.available !== false,
+          })));
+        } else {
+          setTimeSlots([]);
+        }
+      } catch {
+        setTimeSlots([]);
+      } finally {
+        setSlotsLoading(false);
+      }
+    };
+    loadSlots();
+  }, [selectedDate, doctor.id]);
 
   const handleBooking = async () => {
     if (!selectedTime) {
@@ -119,28 +129,43 @@ export default function BookingScreen({ navigation, route }) {
 
       {/* Time Slots */}
       <Text style={[styles.sectionTitle, { marginTop: SPACING.xl }]}>Available Slots</Text>
-      <View style={styles.slotsGrid}>
-        {TIME_SLOTS.map((slot) => (
-          <TouchableOpacity
-            key={slot.time}
-            style={[
-              styles.slotBtn,
-              !slot.available && styles.slotUnavailable,
-              selectedTime === slot.time && styles.slotActive,
-            ]}
-            disabled={!slot.available}
-            onPress={() => setSelectedTime(slot.time)}
-          >
-            <Text style={[
-              styles.slotText,
-              !slot.available && { color: COLORS.textMuted },
-              selectedTime === slot.time && { color: COLORS.textInverse },
-            ]}>
-              {slot.time}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      {slotsLoading ? (
+        <View style={{ alignItems: 'center', paddingVertical: SPACING.xl }}>
+          <ActivityIndicator size="small" color={COLORS.primary} />
+          <Text style={{ ...FONTS.caption, color: COLORS.textSecondary, marginTop: 8 }}>Loading available slots...</Text>
+        </View>
+      ) : timeSlots.length === 0 ? (
+        <View style={{ alignItems: 'center', paddingVertical: SPACING.xl, paddingHorizontal: SPACING.xl }}>
+          <Ionicons name="calendar-outline" size={32} color={COLORS.textMuted} />
+          <Text style={{ ...FONTS.bodyBold, color: COLORS.text, marginTop: SPACING.md }}>No slots available</Text>
+          <Text style={{ ...FONTS.caption, color: COLORS.textSecondary, textAlign: 'center', marginTop: 4 }}>
+            Try a different date or contact the doctor directly
+          </Text>
+        </View>
+      ) : (
+        <View style={styles.slotsGrid}>
+          {timeSlots.map((slot) => (
+            <TouchableOpacity
+              key={slot.time}
+              style={[
+                styles.slotBtn,
+                !slot.available && styles.slotUnavailable,
+                selectedTime === slot.time && styles.slotActive,
+              ]}
+              disabled={!slot.available}
+              onPress={() => setSelectedTime(slot.time)}
+            >
+              <Text style={[
+                styles.slotText,
+                !slot.available && { color: COLORS.textMuted },
+                selectedTime === slot.time && { color: COLORS.textInverse },
+              ]}>
+                {slot.time}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
 
       {/* Symptoms */}
       <View style={{ paddingHorizontal: SPACING.xl, marginTop: SPACING.xl }}>

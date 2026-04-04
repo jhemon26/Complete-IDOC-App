@@ -11,6 +11,7 @@ import { COLORS, FONTS, ROLE_CONFIG } from '../utils/theme';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
+import ResetPasswordScreen from '../screens/auth/ResetPasswordScreen';
 
 // General User Screens
 import GeneralHomeScreen from '../screens/general/HomeScreen';
@@ -24,12 +25,16 @@ import CartScreen from '../screens/general/CartScreen';
 import MyBookingsScreen from '../screens/general/MyBookingsScreen';
 import MyOrdersScreen from '../screens/general/MyOrdersScreen';
 import OrderDetailScreen from '../screens/general/OrderDetailScreen';
+import PrescriptionsScreen from '../screens/general/PrescriptionsScreen';
+import PostRequestScreen from '../screens/general/PostRequestScreen';
+import AvailabilityBoardScreen from '../screens/general/AvailabilityBoardScreen';
 
 // Doctor Screens
 import DoctorHomeScreen from '../screens/doctor/HomeScreen';
 import DoctorAppointmentsScreen from '../screens/doctor/AppointmentsScreen';
 import DoctorPatientsScreen from '../screens/doctor/PatientsScreen';
 import PrescriptionScreen from '../screens/doctor/PrescriptionScreen';
+import PostAvailabilityScreen from '../screens/doctor/PostAvailabilityScreen';
 
 // Pharmacy Screens
 import PharmacyHomeScreen from '../screens/pharmacy/HomeScreen';
@@ -40,6 +45,7 @@ import PharmacyInventoryScreen from '../screens/pharmacy/InventoryScreen';
 import AdminHomeScreen from '../screens/admin/HomeScreen';
 import AdminUsersScreen from '../screens/admin/UsersScreen';
 import AdminApprovalsScreen from '../screens/admin/ApprovalsScreen';
+import AdminDoctorDetailScreen from '../screens/admin/DoctorDetailScreen';
 
 // Shared Screens
 import ChatListScreen from '../screens/shared/ChatListScreen';
@@ -117,6 +123,7 @@ const AuthStack = () => (
     <Stack.Screen name="Login" component={LoginScreen} />
     <Stack.Screen name="Register" component={RegisterScreen} />
     <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+    <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ title: 'Reset Password', headerShown: true }} />
   </Stack.Navigator>
 );
 
@@ -224,6 +231,12 @@ export const AppNavigator = () => {
             <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ title: 'Account Security' }} />
             <Stack.Screen name="MyOrders" component={MyOrdersScreen} options={{ title: 'My Orders' }} />
             <Stack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ title: 'Order Details' }} />
+            {/* New Screens */}
+            <Stack.Screen name="MyPrescriptions" component={PrescriptionsScreen} options={{ title: 'My Prescriptions' }} />
+            <Stack.Screen name="PostRequest" component={PostRequestScreen} options={{ title: 'Post a Request' }} />
+            <Stack.Screen name="AvailabilityBoard" component={AvailabilityBoardScreen} options={{ title: 'Doctor Availability' }} />
+            <Stack.Screen name="PostAvailability" component={PostAvailabilityScreen} options={{ title: 'Post Availability' }} />
+            <Stack.Screen name="AdminDoctorDetail" component={AdminDoctorDetailScreen} options={{ title: 'Review Application' }} />
           </>
         )}
       </Stack.Navigator>

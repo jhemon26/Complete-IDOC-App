@@ -68,17 +68,22 @@ const loadScreen = (label, loader) => {
 const LoginScreen = loadScreen('Login', () => require('../screens/auth/LoginScreen'));
 const RegisterScreen = loadScreen('Register', () => require('../screens/auth/RegisterScreen'));
 const ForgotPasswordScreen = loadScreen('Forgot Password', () => require('../screens/auth/ForgotPasswordScreen'));
+const ResetPasswordScreen = loadScreen('Reset Password', () => require('../screens/auth/ResetPasswordScreen'));
 
 // General
 const GeneralHomeScreen = loadScreen('General Home', () => require('../screens/general/HomeScreen'));
 const DoctorListScreen = loadScreen('Doctor List', () => require('../screens/general/DoctorListScreen'));
 const PharmacyListScreen = loadScreen('Pharmacy List', () => require('../screens/general/PharmacyListScreen'));
 const MyBookingsScreen = loadScreen('My Bookings', () => require('../screens/general/MyBookingsScreen'));
+const PrescriptionsScreen = loadScreen('Prescriptions', () => require('../screens/general/PrescriptionsScreen'));
+const PostRequestScreen = loadScreen('Post Request', () => require('../screens/general/PostRequestScreen'));
+const AvailabilityBoardScreen = loadScreen('Availability Board', () => require('../screens/general/AvailabilityBoardScreen'));
 
 // Doctor
 const DoctorHomeScreen = loadScreen('Doctor Home', () => require('../screens/doctor/HomeScreen'));
 const DoctorAppointmentsScreen = loadScreen('Doctor Appointments', () => require('../screens/doctor/AppointmentsScreen'));
 const DoctorPatientsScreen = loadScreen('Doctor Patients', () => require('../screens/doctor/PatientsScreen'));
+const PostAvailabilityScreen = loadScreen('Post Availability', () => require('../screens/doctor/PostAvailabilityScreen'));
 
 // Pharmacy
 const PharmacyHomeScreen = loadScreen('Pharmacy Home', () => require('../screens/pharmacy/HomeScreen'));
@@ -89,6 +94,7 @@ const PharmacyInventoryScreen = loadScreen('Pharmacy Inventory', () => require('
 const AdminHomeScreen = loadScreen('Admin Home', () => require('../screens/admin/HomeScreen'));
 const AdminUsersScreen = loadScreen('Admin Users', () => require('../screens/admin/UsersScreen'));
 const AdminApprovalsScreen = loadScreen('Admin Approvals', () => require('../screens/admin/ApprovalsScreen'));
+const AdminDoctorDetailScreen = loadScreen('Doctor Application', () => require('../screens/admin/DoctorDetailScreen'));
 
 // Shared
 const ChatListScreen = loadScreen('Chat List', () => require('../screens/shared/ChatListScreen'));
@@ -121,6 +127,7 @@ const AuthStack = () => (
     <Stack.Screen name="Login" component={LoginScreen} />
     <Stack.Screen name="Register" component={RegisterScreen} />
     <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+    <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ title: 'Reset Password', headerShown: true }} />
   </Stack.Navigator>
 );
 
@@ -212,6 +219,12 @@ export const WebNavigator = () => {
             <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ title: 'Account Security' }} />
             <Stack.Screen name="MyOrders" component={MyOrdersScreen} options={{ title: 'My Orders' }} />
             <Stack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ title: 'Order Details' }} />
+            {/* New Screens */}
+            <Stack.Screen name="MyPrescriptions" component={PrescriptionsScreen} options={{ title: 'My Prescriptions' }} />
+            <Stack.Screen name="PostRequest" component={PostRequestScreen} options={{ title: 'Post a Request' }} />
+            <Stack.Screen name="AvailabilityBoard" component={AvailabilityBoardScreen} options={{ title: 'Doctor Availability' }} />
+            <Stack.Screen name="PostAvailability" component={PostAvailabilityScreen} options={{ title: 'Post Availability' }} />
+            <Stack.Screen name="AdminDoctorDetail" component={AdminDoctorDetailScreen} options={{ title: 'Review Application' }} />
           </>
         )}
       </Stack.Navigator>
