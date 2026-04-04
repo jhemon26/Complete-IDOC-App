@@ -124,23 +124,34 @@ SIMPLE_JWT = {
 
 # ─── CORS ───
 CORS_ALLOW_ALL_ORIGINS = env.bool('CORS_ALLOW_ALL_ORIGINS', default=True)
-CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
-    'http://localhost:3000',
-    'http://localhost:8081',
-    'http://localhost:8082',
-    'http://localhost:8083',
-    'http://localhost:19000',
-    'http://localhost:19006',
-])
+# In dev mode, accept any localhost port; in production, use explicit list
+if DEBUG:
+    CORS_ALLOWED_ORIGINS = [f'http://localhost:{port}' for port in range(3000, 10000)]
+else:
+    CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
+        'http://localhost:3000',
+        'http://localhost:8081',
+        'http://localhost:8082',
+        'http://localhost:8083',
+        'http://localhost:8086',
+        'http://localhost:19000',
+        'http://localhost:19006',
+    ])
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
-    'http://localhost:3000',
-    'http://localhost:8081',
-    'http://localhost:8082',
-    'http://localhost:8083',
-    'http://localhost:19000',
-    'http://localhost:19006',
-])
+# Accept any localhost port in dev mode
+CSRF_TRUSTED_ORIGINS = (
+    [f'http://localhost:{port}' for port in range(3000, 10000)]
+    if DEBUG
+    else env.list('CSRF_TRUSTED_ORIGINS', default=[
+        'http://localhost:3000',
+        'http://localhost:8081',
+        'http://localhost:8082',
+        'http://localhost:8083',
+        'http://localhost:8086',
+        'http://localhost:19000',
+        'http://localhost:19006',
+    ])
+)
 
 # ─── Channels (WebSocket) ───
 REDIS_URL = env('REDIS_URL', default='')
