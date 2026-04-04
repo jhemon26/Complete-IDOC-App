@@ -117,7 +117,7 @@ const PrescriptionScreen = loadScreen('Prescription', () => require('../screens/
 const screenOptions = {
   headerStyle: { backgroundColor: COLORS.bgCard },
   headerTintColor: COLORS.text,
-  headerTitleStyle: { fontSize: 17, fontWeight: '700', color: COLORS.text },
+  headerTitleStyle: { ...FONTS.h4, fontWeight: '700' },
   headerBackTitleVisible: false,
   contentStyle: { backgroundColor: COLORS.bg },
 };

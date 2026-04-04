@@ -61,7 +61,7 @@ const Tab = createBottomTabNavigator();
 const screenOptions = {
   headerStyle: { backgroundColor: COLORS.bgCard },
   headerTintColor: COLORS.text,
-  headerTitleStyle: { fontSize: 17, fontWeight: '700', color: COLORS.text },
+  headerTitleStyle: { ...FONTS.h4, fontWeight: '700' },
   headerShadowVisible: true,
   headerBackTitleVisible: false,
   contentStyle: { backgroundColor: COLORS.bg },
