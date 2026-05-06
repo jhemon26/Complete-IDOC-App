@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, TextInput, StyleSheet,
-  ActivityIndicator, Image, Dimensions,
+  ActivityIndicator, Image, Dimensions, Platform,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../utils/theme';
@@ -15,15 +15,15 @@ export const Button = ({
 }) => {
   const variants = {
     primary: { bg: color || COLORS.primary, text: COLORS.white },
-    secondary: { bg: COLORS.bgElevated, text: COLORS.text, border: COLORS.border },
-    outline: { bg: 'transparent', text: color || COLORS.primary, border: color || COLORS.primary },
+    secondary: { bg: COLORS.bgCard, text: COLORS.text, border: COLORS.border },
+    outline: { bg: COLORS.bgCard, text: color || COLORS.primary, border: (color || COLORS.primary) + '66' },
     danger: { bg: COLORS.danger, text: COLORS.white },
     ghost: { bg: 'transparent', text: color || COLORS.primary },
   };
 
   const sizes = {
     sm: { paddingVertical: 8, paddingHorizontal: 16, fontSize: 13 },
-    md: { paddingVertical: 14, paddingHorizontal: 24, fontSize: 15 },
+    md: { paddingVertical: 13, paddingHorizontal: 22, fontSize: 15 },
     lg: { paddingVertical: 18, paddingHorizontal: 32, fontSize: 17 },
   };
 
@@ -46,8 +46,10 @@ export const Button = ({
           flexDirection: 'row',
           opacity: disabled ? 0.5 : 1,
           width: fullWidth ? '100%' : undefined,
-          borderWidth: v.border ? 1.5 : 0,
+          borderWidth: v.border ? 1 : 0,
           borderColor: v.border || 'transparent',
+          minHeight: size === 'sm' ? 38 : size === 'lg' ? 58 : 48,
+          ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : null),
         },
         (variant === 'primary' || variant === 'danger') && SHADOWS.sm,
         style,
@@ -58,7 +60,7 @@ export const Button = ({
       ) : (
         <>
           {icon && <View style={{ marginRight: 8 }}>{icon}</View>}
-          <Text style={[{ color: v.text, fontWeight: '700', fontSize: s.fontSize }, textStyle]}>
+          <Text style={[{ ...FONTS.button, color: v.text, fontSize: s.fontSize }, textStyle]}>
             {title}
           </Text>
         </>
@@ -72,6 +74,8 @@ export const Input = ({
   label, placeholder, value, onChangeText, secureTextEntry = false,
   keyboardType = 'default', error, multiline = false, numberOfLines = 1,
   icon, rightIcon, style, inputStyle, editable = true, autoCapitalize = 'none',
+  autoComplete = 'off', textContentType = 'none', importantForAutofill = 'no',
+  autoCorrect = false, onSubmitEditing, returnKeyType, helperText,
 }) => {
   const [focused, setFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -108,17 +112,27 @@ export const Input = ({
           onBlur={() => setFocused(false)}
           editable={editable}
           autoCapitalize={autoCapitalize}
+          autoCorrect={autoCorrect}
+          autoComplete={autoComplete}
+          textContentType={textContentType}
+          importantForAutofill={importantForAutofill}
+          onSubmitEditing={onSubmitEditing}
+          returnKeyType={returnKeyType}
+          dataSet={Platform.OS === 'web' ? { lpignore: 'true', formType: 'other' } : undefined}
         />
         {secureTextEntry && (
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            <Text style={{ color: COLORS.textSecondary, fontSize: 13 }}>
-              {showPassword ? 'HIDE' : 'SHOW'}
-            </Text>
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeButton}>
+            <Ionicons
+              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+              size={19}
+              color={COLORS.primary}
+            />
           </TouchableOpacity>
         )}
         {rightIcon && <View style={{ marginLeft: SPACING.sm }}>{rightIcon}</View>}
       </View>
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {!!error && <Text style={styles.errorText}>{error}</Text>}
+      {!error && !!helperText && <Text style={styles.helperText}>{helperText}</Text>}
     </View>
   );
 };
@@ -136,6 +150,27 @@ export const Card = ({ children, style, onPress, padding = SPACING.lg }) => {
     </Wrapper>
   );
 };
+
+// ─── BRAND MARK ───
+export const BrandMark = ({ size = 66, color = COLORS.primary, style }) => (
+  <View
+    style={[
+      {
+        width: size,
+        height: size,
+        borderRadius: Math.round(size * 0.34),
+        backgroundColor: color + '10',
+        borderWidth: 1,
+        borderColor: color + '2E',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+      style,
+    ]}
+  >
+    <Ionicons name="medkit-outline" size={Math.round(size * 0.46)} color={color} />
+  </View>
+);
 
 // ─── AVATAR ───
 export const Avatar = ({ name, uri, size = 48, color = COLORS.primary, style }) => {
@@ -162,16 +197,16 @@ export const Avatar = ({ name, uri, size = 48, color = COLORS.primary, style }) 
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: color + '25',
+          backgroundColor: color + '14',
           alignItems: 'center',
           justifyContent: 'center',
-          borderWidth: 2,
-          borderColor: color + '40',
+          borderWidth: 1.5,
+          borderColor: color + '30',
         },
         style,
       ]}
     >
-      <Text style={{ color, fontSize: size * 0.35, fontWeight: '700' }}>
+      <Text style={{ color, fontSize: size * 0.35, fontWeight: '800' }}>
         {initials}
       </Text>
     </View>
@@ -197,12 +232,12 @@ export const Badge = ({ text, color = COLORS.primary, size = 'md', style }) => {
           borderRadius: RADIUS.full,
           alignSelf: 'flex-start',
           borderWidth: 1,
-          borderColor: color + '30',
+          borderColor: color + '28',
         },
         style,
       ]}
     >
-      <Text style={{ color, fontSize: s.fontSize, fontWeight: '600' }}>{text}</Text>
+      <Text style={{ color, fontSize: s.fontSize, fontWeight: '700' }}>{text}</Text>
     </View>
   );
 };
@@ -212,8 +247,8 @@ export const StatCard = ({ label, value, color = COLORS.primary, icon, trend, st
   <Card style={[{ flex: 1 }, style]}>
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
       <View style={{ flex: 1 }}>
-        <Text style={{ ...FONTS.caption, color: COLORS.textSecondary }}>{label}</Text>
-        <Text style={{ ...FONTS.h2, color: COLORS.text, marginTop: 4 }}>{value}</Text>
+        <Text style={{ ...FONTS.captionBold, color: COLORS.textMuted, textTransform: 'uppercase' }}>{label}</Text>
+        <Text style={{ ...FONTS.h2, color: COLORS.text, marginTop: 8 }}>{value}</Text>
         {trend && (
           <Text style={{ ...FONTS.small, color: trend > 0 ? COLORS.success : COLORS.danger, marginTop: 4 }}>
             {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}%
@@ -222,8 +257,10 @@ export const StatCard = ({ label, value, color = COLORS.primary, icon, trend, st
       </View>
       {icon && (
         <View style={{
-          width: 40, height: 40, borderRadius: 12,
-          backgroundColor: color + '15', alignItems: 'center', justifyContent: 'center',
+          width: 42, height: 42, borderRadius: RADIUS.md,
+          backgroundColor: color + '12', alignItems: 'center', justifyContent: 'center',
+          borderWidth: 1,
+          borderColor: color + '24',
         }}>
           {icon}
         </View>
@@ -253,6 +290,18 @@ export const SectionHeader = ({ title, actionText, onAction, style }) => (
         <Text style={{ ...FONTS.captionBold, color: COLORS.primary }}>{actionText}</Text>
       </TouchableOpacity>
     )}
+  </View>
+);
+
+// ─── COMPACT PAGE HEADER ───
+export const PageHeader = ({ eyebrow, title, subtitle, action, color = COLORS.primary, style }) => (
+  <View style={[styles.pageHeader, { borderLeftColor: color }, style]}>
+    <View style={{ flex: 1 }}>
+      {!!eyebrow && <Text style={[styles.pageEyebrow, { color }]}>{eyebrow}</Text>}
+      <Text style={styles.pageTitle}>{title}</Text>
+      {!!subtitle && <Text style={styles.pageSubtitle}>{subtitle}</Text>}
+    </View>
+    {action}
   </View>
 );
 
@@ -319,8 +368,6 @@ const styles = StyleSheet.create({
     ...FONTS.captionBold,
     color: COLORS.textSecondary,
     marginBottom: SPACING.sm,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -329,12 +376,17 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     paddingHorizontal: SPACING.lg,
     height: 52,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: COLORS.border,
   },
   inputFocused: {
     borderColor: COLORS.primary,
-    backgroundColor: COLORS.bgElevated,
+    backgroundColor: COLORS.bgCard,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 3,
   },
   inputError: {
     borderColor: COLORS.danger,
@@ -344,6 +396,15 @@ const styles = StyleSheet.create({
     ...FONTS.body,
     color: COLORS.text,
     height: '100%',
+    ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : null),
+  },
+  eyeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: RADIUS.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primaryLight,
   },
   errorText: {
     ...FONTS.small,
@@ -351,12 +412,45 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
     marginLeft: SPACING.xs,
   },
+  helperText: {
+    ...FONTS.small,
+    color: COLORS.textMuted,
+    marginTop: SPACING.xs,
+    marginLeft: SPACING.xs,
+  },
   card: {
     backgroundColor: COLORS.bgCard,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderLight,
     ...SHADOWS.sm,
+  },
+  pageHeader: {
+    marginHorizontal: SPACING.xl,
+    marginBottom: SPACING.lg,
+    padding: SPACING.lg,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderLeftWidth: 4,
+    borderColor: COLORS.borderLight,
+    backgroundColor: COLORS.bgCard,
+    flexDirection: 'row',
+    alignItems: 'center',
+    ...SHADOWS.sm,
+  },
+  pageEyebrow: {
+    ...FONTS.captionBold,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
+  pageTitle: {
+    ...FONTS.h3,
+    color: COLORS.text,
+  },
+  pageSubtitle: {
+    ...FONTS.caption,
+    color: COLORS.textSecondary,
+    marginTop: 4,
   },
   searchBar: {
     flexDirection: 'row',
@@ -364,7 +458,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bgInput,
     borderRadius: RADIUS.md,
     paddingHorizontal: SPACING.lg,
-    height: 46,
+    height: 48,
     borderWidth: 1,
     borderColor: COLORS.border,
   },

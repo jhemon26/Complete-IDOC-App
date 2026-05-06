@@ -62,7 +62,7 @@ const screenOptions = {
   headerStyle: { backgroundColor: COLORS.bgCard },
   headerTintColor: COLORS.text,
   headerTitleStyle: { ...FONTS.h4, fontWeight: '700' },
-  headerShadowVisible: true,
+  headerShadowVisible: false,
   headerBackTitleVisible: false,
   contentStyle: { backgroundColor: COLORS.bg },
   animation: 'slide_from_right',
@@ -83,10 +83,10 @@ const createTabScreenOptions = (role) => ({ route }) => ({
     backgroundColor: COLORS.bgCard,
     borderTopColor: COLORS.border,
     borderTopWidth: 1,
-    height: Platform.OS === 'web' && Dimensions.get('window').width <= 430 ? 56 : 62,
-    paddingBottom: Platform.OS === 'web' && Dimensions.get('window').width <= 430 ? 4 : 6,
-    paddingTop: Platform.OS === 'web' && Dimensions.get('window').width <= 430 ? 4 : 6,
-    paddingHorizontal: 4,
+    height: Platform.OS === 'web' && Dimensions.get('window').width <= 430 ? 58 : 66,
+    paddingBottom: Platform.OS === 'web' && Dimensions.get('window').width <= 430 ? 5 : 8,
+    paddingTop: Platform.OS === 'web' && Dimensions.get('window').width <= 430 ? 5 : 8,
+    paddingHorizontal: 6,
   },
   tabBarHideOnKeyboard: true,
   tabBarActiveTintColor: getRoleAccent(role),
@@ -201,7 +201,7 @@ export const AppNavigator = () => {
   return (
     <NavigationContainer
       theme={{
-        dark: true,
+        dark: false,
         colors: {
           primary: roleAccent,
           background: COLORS.bg,

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAuth } from '../../context/AuthContext';
-import { Card, Avatar, Badge, SectionHeader } from '../../components/UIComponents';
+import { Card, Avatar, Badge, PageHeader, SectionHeader } from '../../components/UIComponents';
 import AccountQuickMenu from '../../components/AccountQuickMenu';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../../utils/theme';
 import useRoleDashboard from '../../hooks/useRoleDashboard';
@@ -56,13 +56,14 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.greeting}>Hello,</Text>
-          <Text style={styles.userName}>{user?.name || 'Patient'}</Text>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <View style={styles.topSpacer} />
+      <PageHeader
+        eyebrow="Patient dashboard"
+        title={`Hello, ${user?.name || 'Patient'}`}
+        subtitle="Book care, manage medicine, and keep your consultation history close."
+        color={COLORS.general}
+        action={(
+          <View style={styles.headerActions}>
           <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
             <View style={styles.notifBtn}>
               <Ionicons name="notifications-outline" size={20} color={COLORS.text} />
@@ -70,8 +71,9 @@ export default function HomeScreen({ navigation }) {
             </View>
           </TouchableOpacity>
           <AccountQuickMenu navigation={navigation} />
-        </View>
-      </View>
+          </View>
+        )}
+      />
 
       {loading && (
         <View style={styles.stateWrap}>
@@ -186,15 +188,8 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.bg },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.xl,
-    paddingTop: 60,
-    paddingBottom: SPACING.lg,
-  },
-  greeting: { ...FONTS.body, color: COLORS.textSecondary },
-  userName: { ...FONTS.h2, color: COLORS.text },
+  topSpacer: { height: 54 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', marginLeft: SPACING.md },
   notifBtn: { position: 'relative', padding: 8 },
   notifDot: {
     position: 'absolute',
@@ -254,7 +249,7 @@ const styles = StyleSheet.create({
   },
   quickActionBadgeText: {
     ...FONTS.small,
-    color: COLORS.text,
+    color: COLORS.white,
     fontSize: 10,
   },
   quickActionLabel: { ...FONTS.small, color: COLORS.textSecondary, textAlign: 'center' },

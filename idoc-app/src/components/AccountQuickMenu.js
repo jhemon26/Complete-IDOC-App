@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(6, 10, 20, 0.5)',
+    backgroundColor: 'rgba(7, 17, 31, 0.32)',
     justifyContent: 'flex-start',
     alignItems: 'flex-end',
     paddingTop: 92,
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.md,
+    paddingVertical: SPACING.lg,
   },
   itemText: {
     ...FONTS.body,

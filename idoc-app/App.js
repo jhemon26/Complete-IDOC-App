@@ -69,13 +69,13 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <AuthProvider>
-          <StatusBar style="light" />
+          <StatusBar style="dark" />
           {NavigatorComponent ? (
             <NavigatorComponent />
           ) : (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Platform.OS === 'web' ? '#ffffff' : COLORS.bg }}>
-              <ActivityIndicator size="large" color={Platform.OS === 'web' ? '#111111' : COLORS.primary} />
-              <Text style={{ marginTop: 12, color: Platform.OS === 'web' ? '#222222' : COLORS.textSecondary }}>
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.bg }}>
+              <ActivityIndicator size="large" color={COLORS.primary} />
+              <Text style={{ marginTop: 12, color: COLORS.textSecondary }}>
                 Loading app...
               </Text>
             </View>

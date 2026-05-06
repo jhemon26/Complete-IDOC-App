@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, useWindowDimensions } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAuth } from '../../context/AuthContext';
-import { Card, StatCard, Badge, SectionHeader } from '../../components/UIComponents';
+import { Card, StatCard, Badge, PageHeader, SectionHeader } from '../../components/UIComponents';
 import AccountQuickMenu from '../../components/AccountQuickMenu';
 import { COLORS, FONTS, SPACING } from '../../utils/theme';
 import useRoleDashboard from '../../hooks/useRoleDashboard';
@@ -28,18 +28,21 @@ export default function AdminHomeScreen({ navigation }) {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <View style={{ flex: 1 }}>
-          <Text style={{ ...FONTS.body, color: COLORS.textSecondary }}>Admin Panel</Text>
-          <Text style={{ ...FONTS.h2, color: COLORS.text }}>{user?.name || 'Admin'}</Text>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <View style={styles.topSpacer} />
+      <PageHeader
+        eyebrow="Admin control"
+        title={user?.name || 'Admin'}
+        subtitle="Moderate approvals, users, revenue, alerts, and platform health."
+        color={COLORS.admin}
+        action={(
+          <View style={styles.headerActions}>
           <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
             <Ionicons name="notifications-outline" size={22} color={COLORS.text} />
           </TouchableOpacity>
           <AccountQuickMenu navigation={navigation} />
-        </View>
-      </View>
+          </View>
+        )}
+      />
 
       {loading && (
         <View style={styles.stateWrap}>
@@ -110,7 +113,8 @@ export default function AdminHomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.bg },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: SPACING.xl, paddingTop: 60, paddingBottom: SPACING.lg },
+  topSpacer: { height: 54 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', marginLeft: SPACING.md },
   quickActions: {
     flexDirection: 'row',
     flexWrap: 'wrap',

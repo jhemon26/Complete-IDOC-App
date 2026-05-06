@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, FONTS, RADIUS, SPACING } from './theme';
+import { COLORS, FONTS, RADIUS, SPACING, SHADOWS } from './theme';
 
 export const toastConfig = {
   success: ({ text1, text2 }) => (
@@ -26,11 +26,14 @@ export const toastConfig = {
 const styles = StyleSheet.create({
   container: {
     width: '90%',
-    backgroundColor: COLORS.bgElevated,
-    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     borderLeftWidth: 4,
     padding: SPACING.lg,
     marginTop: SPACING.sm,
+    ...SHADOWS.md,
   },
   title: {
     ...FONTS.bodyBold,

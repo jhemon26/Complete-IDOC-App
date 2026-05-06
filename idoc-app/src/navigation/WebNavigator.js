@@ -179,7 +179,7 @@ export const WebNavigator = () => {
   return (
     <NavigationContainer
       theme={{
-        dark: true,
+        dark: false,
         colors: {
           primary: roleAccent,
           background: COLORS.bg,
